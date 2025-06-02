@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/vebrasmusic/agree/pkg/parser"
 )
 
 // checkCmd represents the check command
@@ -15,6 +16,7 @@ var checkCmd = &cobra.Command{
 	Short: "Check your tracked schemas for missing changes.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("check called")
+		parser.ParseBytes()
 		return nil
 	},
 }
