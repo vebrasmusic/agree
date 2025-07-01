@@ -1,3 +1,4 @@
+# [agree:user:pydantic]
 class UserSchema(BaseModel):
     id: int
     username: str
@@ -6,3 +7,4 @@ class UserSchema(BaseModel):
 
     class Config:
         orm_mode = True
+# [agree:end]
