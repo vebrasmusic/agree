@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	treesitter "github.com/tree-sitter/go-tree-sitter"
-	treesitter_ts "github.com/tree-sitter/tree-sitter-typescript/bindings/go"
+	treesitter_py "github.com/tree-sitter/tree-sitter-python/bindings/go"
 )
 
 // SchemaNode represents an abstract schema element extracted from treesitter output
@@ -57,16 +57,36 @@ func returnTextWithAgreeString(text []byte) []string {
 }
 
 func ParseBytes() {
-	code := openFiles("test-data/zod.ts")
+	code := openFiles("test-data/pydantic.py")
 
 	parser := treesitter.NewParser()
 	defer parser.Close()
-	parser.SetLanguage(treesitter.NewLanguage(treesitter_ts.LanguageTypescript()))
+
+	language := treesitter.NewLanguage(treesitter_py.Language())
+	parser.SetLanguage(language)
 
 	tree := parser.Parse(code, nil)
 	defer tree.Close()
 
-	root := tree.RootNode()
+	query, err := treesitter.NewQuery(language, `
 
-	dump(root, code, 0)
+		`)
+	if err != nil {
+		panic(err)
+	}
+
+	defer query.Close()
+
+	qc := treesitter.NewQueryCursor()
+	defer qc.Close()
+
+	captures := qc.Captures(query, tree.RootNode(), code)
+
+	for match, index := captures.Next(); match != nil; match, index = captures.Next() {
+		fmt.Printf(
+			"Capture %d: %s\n",
+			index,
+			match.Captures[index].Node.Utf8Text(code),
+		)
+	}
 }
