@@ -15,12 +15,42 @@ var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Check your tracked schemas for missing changes.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sqlModels, pydModels, err := parser.ParsePythonFiles("test-data")
-		if err != nil {
-			return err
+		useGrammar, _ := cmd.Flags().GetBool("grammar")
+		
+		if useGrammar {
+			// Use new grammar-based parsing (supports both Python and TypeScript)
+			allModels, err := parser.ParseFilesWithGrammars("test-data", "grammars")
+			if err != nil {
+				return err
+			}
+			
+			// Compare sqlalchemy vs pydantic
+			report := parser.CompareModelsWithGrammars(allModels, "sqlalchemy", "pydantic")
+			fmt.Println("=== Grammar-based parsing results ===")
+			fmt.Println("SQLAlchemy vs Pydantic:")
+			fmt.Println(report)
+			
+			// Compare Pydantic vs Zod (cross-language)
+			zodReport := parser.CompareModelsWithGrammars(allModels, "pydantic", "zod")
+			fmt.Println("\nPydantic vs Zod (Python ↔ TypeScript):")
+			fmt.Println(zodReport)
+			
+			// Show what grammars were loaded
+			fmt.Println("\n=== Available schema types ===")
+			for schemaType, models := range allModels {
+				fmt.Printf("%s: %d models\n", schemaType, len(models))
+			}
+		} else {
+			// Use original hardcoded parsing
+			sqlModels, pydModels, err := parser.ParsePythonFiles("test-data")
+			if err != nil {
+				return err
+			}
+			report := parser.CompareModels(sqlModels, pydModels)
+			fmt.Println("=== Legacy parsing results ===")
+			fmt.Println(report)
 		}
-		report := parser.CompareModels(sqlModels, pydModels)
-		fmt.Println(report)
+		
 		return nil
 	},
 }
@@ -28,13 +58,6 @@ var checkCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(checkCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// checkCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// checkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Add flag to enable grammar-based parsing
+	checkCmd.Flags().BoolP("grammar", "g", false, "Use grammar-based parsing instead of legacy hardcoded parsing")
 }

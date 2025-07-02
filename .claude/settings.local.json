@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go:*)",
+      "Bash(find:*)",
+      "Bash(./agree check:*)"
+    ],
+    "deny": []
+  }
+}

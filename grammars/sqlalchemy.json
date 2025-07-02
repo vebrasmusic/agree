@@ -1,0 +1,78 @@
+{
+  "name": "sqlalchemy",
+  "language": "python",
+  "patterns": [
+    {
+      "name": "column_syntax",
+      "query": "(assignment left: (identifier) @field_name right: (call function: (identifier) @func_name arguments: (argument_list (_) @first_arg)))",
+      "field_name": {
+        "node_type": "identifier",
+        "field_name": "left"
+      },
+      "field_type": {
+        "node_type": "argument",
+        "text_pattern": "^([A-Za-z]+)"
+      },
+      "conditions": ["func_name == 'Column'"]
+    },
+    {
+      "name": "mapped_syntax",
+      "query": "(assignment left: (identifier) @field_name type: (subscript value: (identifier) @mapped_type slice: (_) @inner_type))",
+      "field_name": {
+        "node_type": "identifier",
+        "field_name": "left"
+      },
+      "field_type": {
+        "node_type": "subscript_slice",
+        "field_name": "type"
+      },
+      "conditions": ["mapped_type == 'Mapped'"]
+    },
+    {
+      "name": "mapped_column_syntax",
+      "query": "(assignment left: (identifier) @field_name type: (subscript value: (identifier) @mapped_type) right: (call function: (identifier) @func_name))",
+      "field_name": {
+        "node_type": "identifier", 
+        "field_name": "left"
+      },
+      "field_type": {
+        "node_type": "subscript_slice",
+        "field_name": "type"
+      },
+      "conditions": ["mapped_type == 'Mapped'", "func_name == 'mapped_column'"]
+    },
+    {
+      "name": "relationship_syntax",
+      "query": "(assignment left: (identifier) @field_name right: (call function: (identifier) @func_name))",
+      "field_name": {
+        "node_type": "identifier",
+        "field_name": "left"
+      },
+      "field_type": {
+        "node_type": "static",
+        "text_pattern": "relationship"
+      },
+      "conditions": ["func_name == 'relationship'"]
+    }
+  ],
+  "type_mapping": {
+    "Integer": "integer",
+    "String": "string",
+    "Float": "number", 
+    "Boolean": "boolean",
+    "Text": "text",
+    "DateTime": "datetime",
+    "Date": "date",
+    "Time": "time",
+    "JSON": "json",
+    "ARRAY": "array",
+    "int": "integer",
+    "str": "string",
+    "float": "number",
+    "bool": "boolean",
+    "Optional[int]": "integer?",
+    "Optional[str]": "string?",
+    "Optional[float]": "number?",
+    "Optional[bool]": "boolean?"
+  }
+}

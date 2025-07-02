@@ -7,4 +7,16 @@ class UserSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# [agree:end]
+#
+
+
+# [agree:post:pydantic]
+class PostSchema(BaseModel):
+    id: int
+    user: str
+
+
 # [agree:end]

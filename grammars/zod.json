@@ -1,0 +1,78 @@
+{
+  "name": "zod",
+  "language": "typescript",
+  "patterns": [
+    {
+      "name": "object_field",
+      "query": "(pair key: (property_identifier) @field_name value: (call_expression function: (member_expression) @type_call))",
+      "field_name": {
+        "node_type": "property_identifier",
+        "field_name": "field_name"
+      },
+      "field_type": {
+        "node_type": "member_expression",
+        "text_pattern": "z\\.([a-zA-Z]+)"
+      },
+      "conditions": ["inside_z_object"]
+    },
+    {
+      "name": "chained_type",
+      "query": "(pair key: (property_identifier) @field_name value: (call_expression function: (member_expression object: (call_expression) property: (property_identifier)) @chained_call))",
+      "field_name": {
+        "node_type": "property_identifier",
+        "field_name": "field_name"
+      },
+      "field_type": {
+        "node_type": "call_expression",
+        "text_pattern": "z\\.([a-zA-Z]+)\\(\\)\\.([a-zA-Z]+)\\(\\)"
+      },
+      "conditions": ["inside_z_object"]
+    },
+    {
+      "name": "nested_schema",
+      "query": "(pair key: (property_identifier) @field_name value: (identifier) @schema_ref)",
+      "field_name": {
+        "node_type": "property_identifier",
+        "field_name": "field_name"
+      },
+      "field_type": {
+        "node_type": "identifier",
+        "text_pattern": "(.+)Schema"
+      },
+      "conditions": ["inside_z_object"]
+    },
+    {
+      "name": "array_type",
+      "query": "(pair key: (property_identifier) @field_name value: (call_expression function: (member_expression object: (identifier) property: (property_identifier)) arguments: (arguments (call_expression))))",
+      "field_name": {
+        "node_type": "property_identifier",
+        "field_name": "field_name"
+      },
+      "field_type": {
+        "node_type": "call_expression",
+        "text_pattern": "z\\.array\\(z\\.([a-zA-Z]+)\\(\\)\\)"
+      },
+      "conditions": ["inside_z_object"]
+    }
+  ],
+  "type_mapping": {
+    "string": "string",
+    "number": "number",
+    "boolean": "boolean",
+    "date": "date",
+    "array": "array",
+    "object": "object",
+    "string().email": "email",
+    "string().url": "url",
+    "string().uuid": "uuid",
+    "string().nullable": "string?",
+    "number().nullable": "number?",
+    "boolean().nullable": "boolean?",
+    "string().optional": "string?",
+    "number().optional": "number?",
+    "boolean().optional": "boolean?",
+    "array(string())": "string[]",
+    "array(number())": "number[]"
+  }
+}
+

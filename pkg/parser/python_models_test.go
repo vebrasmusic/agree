@@ -7,20 +7,39 @@ func TestParsePythonFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse failed: %v", err)
 	}
-	if len(sql) != 1 {
-		t.Fatalf("expected 1 sql model, got %d", len(sql))
+	// We now have more test data files, so expect more models
+	if len(sql) < 1 {
+		t.Fatalf("expected at least 1 sql model, got %d", len(sql))
 	}
-	if len(pyd) != 1 {
-		t.Fatalf("expected 1 pydantic model, got %d", len(pyd))
+	if len(pyd) < 1 {
+		t.Fatalf("expected at least 1 pydantic model, got %d", len(pyd))
 	}
-	m := sql["user"]
+	
+	// Check that we have the user model
+	m, exists := sql["user"]
+	if !exists {
+		t.Fatalf("sql model 'user' not found. Available models: %v", getKeys(sql))
+	}
 	if _, ok := m.Fields["id"]; !ok {
 		t.Fatalf("sql model missing field id")
 	}
-	pm := pyd["user"]
+	
+	pm, exists := pyd["user"]
+	if !exists {
+		t.Fatalf("pydantic model 'user' not found. Available models: %v", getKeys(pyd))
+	}
 	if _, ok := pm.Fields["username"]; !ok {
 		t.Fatalf("pyd model missing field username")
 	}
+}
+
+// Helper function to get map keys for debugging
+func getKeys(m map[string]Model) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 func TestCompareModels(t *testing.T) {
