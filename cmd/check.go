@@ -15,8 +15,12 @@ var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Check your tracked schemas for missing changes.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("check called")
-		parser.ParseBytes()
+		sqlModels, pydModels, err := parser.ParsePythonFiles("test-data")
+		if err != nil {
+			return err
+		}
+		report := parser.CompareModels(sqlModels, pydModels)
+		fmt.Println(report)
 		return nil
 	},
 }
