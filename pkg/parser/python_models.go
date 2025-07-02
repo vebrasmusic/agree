@@ -191,37 +191,49 @@ func normalizeType(t string) string {
 
 // CompareModels compares SQLAlchemy models with Pydantic models and returns a report.
 func CompareModels(sqlModels, pydModels map[string]Model) string {
+	return CompareModelsWithEquivalence(sqlModels, pydModels)
+}
+
+// CompareModelsWithEquivalence compares models using type equivalence rules
+func CompareModelsWithEquivalence(models1, models2 map[string]Model) string {
+	typeEquiv := NewTypeEquivalenceMap()
 	var sb strings.Builder
-	for nick, sqlModel := range sqlModels {
-		pydModel, ok := pydModels[nick]
+	
+	for nick, model1 := range models1 {
+		model2, ok := models2[nick]
 		if !ok {
 			continue
 		}
-		missingSQL := []string{}
-		missingPyd := []string{}
+		missingInModel2 := []string{}
+		missingInModel1 := []string{}
 		typeMismatch := []string{}
-		for fname, f := range pydModel.Fields {
-			sf, ok := sqlModel.Fields[fname]
+		
+		for fname, f1 := range model1.Fields {
+			f2, ok := model2.Fields[fname]
 			if !ok {
-				missingSQL = append(missingSQL, fname)
+				missingInModel2 = append(missingInModel2, fname)
 				continue
 			}
-			if sf.Type != f.Type {
-				typeMismatch = append(typeMismatch, fmt.Sprintf("%s (%s != %s)", fname, sf.Type, f.Type))
+			
+			// Use type equivalence instead of exact match
+			if !typeEquiv.AreTypesEquivalent(f1.Type, f2.Type) {
+				typeMismatch = append(typeMismatch, fmt.Sprintf("%s (%s != %s)", fname, f1.Type, f2.Type))
 			}
 		}
-		for fname := range sqlModel.Fields {
-			if _, ok := pydModel.Fields[fname]; !ok {
-				missingPyd = append(missingPyd, fname)
+		
+		for fname := range model2.Fields {
+			if _, ok := model1.Fields[fname]; !ok {
+				missingInModel1 = append(missingInModel1, fname)
 			}
 		}
-		if len(missingSQL)+len(missingPyd)+len(typeMismatch) > 0 {
+		
+		if len(missingInModel2)+len(missingInModel1)+len(typeMismatch) > 0 {
 			sb.WriteString(fmt.Sprintf("Model %s:\n", nick))
-			if len(missingSQL) > 0 {
-				sb.WriteString("  Missing in SQLAlchemy: " + strings.Join(missingSQL, ", ") + "\n")
+			if len(missingInModel2) > 0 {
+				sb.WriteString("  Missing in second schema: " + strings.Join(missingInModel2, ", ") + "\n")
 			}
-			if len(missingPyd) > 0 {
-				sb.WriteString("  Missing in Pydantic: " + strings.Join(missingPyd, ", ") + "\n")
+			if len(missingInModel1) > 0 {
+				sb.WriteString("  Missing in first schema: " + strings.Join(missingInModel1, ", ") + "\n")
 			}
 			if len(typeMismatch) > 0 {
 				sb.WriteString("  Type mismatches: " + strings.Join(typeMismatch, ", ") + "\n")

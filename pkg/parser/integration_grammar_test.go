@@ -130,7 +130,7 @@ func TestCrossLanguageTypeMapping(t *testing.T) {
 	}{
 		{"string types", "string", "string", true},
 		{"boolean types", "boolean", "boolean", true},
-		{"integer vs number", "integer", "number", false},
+		{"integer vs number", "integer", "number", true}, // Now equivalent
 		{"email types", "email", "email", true},
 		{"nullable string", "string?", "string?", true},
 		{"nullable vs regular", "string", "string?", false},

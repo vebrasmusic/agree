@@ -285,7 +285,7 @@ func TestCrossLanguageMatching(t *testing.T) {
 			expectMatch: true,
 		},
 		{
-			name: "number vs integer mismatch",
+			name: "number vs integer should now match due to equivalence",
 			pydanticModel: Model{
 				Name: "User",
 				Fields: map[string]Field{
@@ -298,8 +298,7 @@ func TestCrossLanguageMatching(t *testing.T) {
 					"id": {Name: "id", Type: "number"},
 				},
 			},
-			expectMatch:  false,
-			expectedType: "Type mismatches",
+			expectMatch:  true, // Changed: now equivalent
 		},
 		{
 			name: "missing field cross-language",
