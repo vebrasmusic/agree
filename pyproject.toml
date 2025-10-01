@@ -5,5 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "libcst>=1.8.5",
     "typer>=0.19.2",
 ]
